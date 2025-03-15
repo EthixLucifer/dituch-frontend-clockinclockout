@@ -3,19 +3,35 @@ import ClockButton from "../components/clockbutton";
 import DailyLog from "../components/dailylog";
 import WeeklyLog from "../components/weeklylog";
 import DateSelector from "../components/dateselector";
-import { fetchEntries } from "../api/api";
+import { fetchEntries, fetchWeeklyEntries } from "../api/api";
 
 const Dashboard = () => {
   const [dailyLogs, setDailyLogs] = useState([]);
   const [weeklyLogs, setWeeklyLogs] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [weeklyStartDate, setWeeklyStartDate] = useState("");
 
   const loadData = async (date) => {
     try {
-      const entries = await fetchEntries(date);
-      setDailyLogs(entries);
-      // For weekly view, you'd need a separate API endpoint to fetch week data
-      setWeeklyLogs(entries); // Temporary - replace with actual weekly data
+      // Load daily entries
+      const dailyEntries = await fetchEntries(date);
+      setDailyLogs(dailyEntries);
+
+      // Calculate week boundaries
+      const [year, month, day] = date.split('-');
+      const selectedDateObj = new Date(year, month - 1, day);
+      const dayOfWeek = selectedDateObj.getDay();
+      const startOfWeek = new Date(selectedDateObj);
+      startOfWeek.setDate(selectedDateObj.getDate() - dayOfWeek);
+      
+      const startDateString = `${startOfWeek.getFullYear()}-${(startOfWeek.getMonth() + 1)
+        .toString().padStart(2, '0')}-${startOfWeek.getDate().toString().padStart(2, '0')}`;
+      
+      setWeeklyStartDate(startDateString);
+
+      // Load weekly entries
+      const weeklyEntries = await fetchWeeklyEntries(startDateString);
+      setWeeklyLogs(weeklyEntries);
     } catch (error) {
       console.error("Error loading data:", error);
     }
@@ -42,7 +58,7 @@ const Dashboard = () => {
       </div>
       <div className="card shadow">
         <div className="card-body">
-          <WeeklyLog logs={weeklyLogs} />
+          <WeeklyLog logs={weeklyLogs} startDate={weeklyStartDate} />
         </div>
       </div>
     </div>
