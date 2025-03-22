@@ -1,5 +1,8 @@
+import React from "react";
+
 const DateSelector = ({ onChange, value }) => {
-    return (
+  return (
+    <div className="d-flex align-items-center">
       <input
         type="date"
         className="form-control"
@@ -7,7 +10,9 @@ const DateSelector = ({ onChange, value }) => {
         onChange={(e) => onChange(e.target.value)}
         style={{ maxWidth: '200px' }}
       />
-    );
-  };
-  
-  export default DateSelector;
+      <span className="ms-2">{new Date(value).toDateString()}</span>
+    </div>
+  );
+};
+
+export default DateSelector;

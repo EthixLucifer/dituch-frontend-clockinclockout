@@ -1,3 +1,4 @@
+// weeklylog.jsx
 import { useState, useEffect } from "react";
 import { Card, Table } from "react-bootstrap";
 
@@ -26,6 +27,30 @@ const WeeklyLog = ({ logs, startDate }) => {
     acc[date].push(log);
     return acc;
   }, {});
+
+  const formatDateTime = (dateString) => {
+    const options = {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    };
+    return new Date(dateString).toLocaleString('en-US', options);
+  };
+
+  const calculateDuration = (start, end) => {
+    const startTime = new Date(start);
+    const endTime = end ? new Date(end) : new Date();
+    const durationMs = endTime - startTime;
+    
+    const hours = Math.floor(durationMs / 3600000);
+    const minutes = Math.floor((durationMs % 3600000) / 60000);
+    const seconds = Math.floor((durationMs % 60000) / 1000);
+    
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
 
   return (
     <Card>
@@ -57,15 +82,12 @@ const WeeklyLog = ({ logs, startDate }) => {
                     entries.map((entry) => (
                       <tr key={entry.id}>
                         <td>
-                          {new Date(entry.start_time).toLocaleTimeString()} -{" "}
+                          {formatDateTime(entry.start_time)} -{" "}
                           {entry.end_time ? 
-                            new Date(entry.end_time).toLocaleTimeString() : "Now"}
+                            formatDateTime(entry.end_time) : "Now"}
                         </td>
                         <td>
-                          {(
-                            ((entry.end_time || Date.now()) - 
-                            new Date(entry.start_time)) / 3600000
-                          ).toFixed(1)}h
+                          {calculateDuration(entry.start_time, entry.end_time)}
                         </td>
                         <td>{entry.project?.name || "N/A"}</td>
                       </tr>

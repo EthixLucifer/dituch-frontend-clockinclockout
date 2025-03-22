@@ -1,3 +1,4 @@
+// clockbutton.js
 import { useState, useEffect } from "react";
 import { Button, Spinner } from "react-bootstrap";
 import { fetchEntries, clockIn, clockOut } from "../api/api";
@@ -7,6 +8,7 @@ const ClockButton = ({ onClock }) => {
   const [loading, setLoading] = useState(false);
   const [activeEntry, setActiveEntry] = useState(null);
 
+  // Fetch active entry on component mount
   useEffect(() => {
     const checkStatus = async () => {
       try {
@@ -26,16 +28,22 @@ const ClockButton = ({ onClock }) => {
     setLoading(true);
     try {
       if (isClockedIn) {
+        // Clock Out
         await clockOut(activeEntry.id);
+        setIsClockedIn(false);
+        setActiveEntry(null); // Reset active entry
       } else {
-        await clockIn();
+        // Clock In
+        const newEntry = await clockIn();
+        setIsClockedIn(true);
+        setActiveEntry(newEntry); // Set the new active entry
       }
-      await onClock?.();
-      setIsClockedIn(!isClockedIn);
+      onClock?.(); // Trigger the callback to refresh data
     } catch (error) {
       console.error("Clock operation failed:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

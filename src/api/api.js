@@ -21,16 +21,19 @@ export const fetchEntries = async (date = "") => {
   }
 };
 
+// api.js
 export const clockIn = async () => {
   try {
-    await axiosInstance.post("/entries/", {
+    const response = await axiosInstance.post("/entries/", {
       project: 1,
       activity: 1,
       location: 1,
       status: 1,
     });
+    return response.data; // Return the created entry
   } catch (error) {
     console.error("Error clocking in:", error.response?.data || error);
+    throw error; // Re-throw the error to handle it in the component
   }
 };
 
